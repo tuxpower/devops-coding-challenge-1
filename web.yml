@@ -2,6 +2,7 @@
 
 # Bootsrap server
 - hosts: localhost
+  sudo: yes
   gather_facts: no
   connection: local
 
