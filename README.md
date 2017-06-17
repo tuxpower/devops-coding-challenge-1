@@ -69,7 +69,7 @@ Good question. Feel free to tell us how to make the test better. Or, you know, f
 
 # Challenge Accepted
 
-#### How to create the server
+#### How to create the server
 
 Start by exporting the configuration variables for the AWS user, i.e.:
 
