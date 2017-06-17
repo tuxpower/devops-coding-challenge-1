@@ -66,3 +66,107 @@ If we proceed to a phone interview, we’ll be asking questions about why you ma
 #### Why doesn't the test include X?
 
 Good question. Feel free to tell us how to make the test better. Or, you know, fork it and improve it!
+
+# Challenge Accepted
+
+#### How to create the server
+
+Start by exporting the configuration variables for the AWS user, i.e.:
+
+```bash
+$ export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+$ export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+$ export AWS_DEFAULT_REGION=eu-west-1
+```
+
+Then using AWS cli create a stack using the CloudFormation template available in this repo:
+
+```bash
+$ aws cloudformation create-stack \
+--stack-name DevOpsCodingChallenge \
+--template-body file://DevOpsCodingChallenge.template \
+--parameters ParameterKey=InstanceType,ParameterValue=t2.micro \
+ParameterKey=KeyName,ParameterValue=devops-key \
+ParameterKey=SSHLocation,ParameterValue="0.0.0.0/0" \
+ParameterKey=Subnets,ParameterValue=subnet-47a8391e\\,subnet-861046e3\\,subnet-d1c2bda6 \
+ParameterKey=VpcId,ParameterValue=vpc-3ce38759 
+{
+    "StackId": "arn:aws:cloudformation:eu-west-1:xxxxxxxxxxxx:stack/DevOpsCodingChallenge/bc0a5070-536e-11e7-9393-500c4266c6d2"
+}
+```
+
+Check stack status by running the following command:
+
+```bash
+$ aws cloudformation describe-stacks --stack-name DevOpsCodingChallenge --query "Stacks[*].StackStatus" --output text
+CREATE_IN_PROGRESS
+```
+
+When it finishes the stack status should change to COMPLETE:
+
+```bash
+$ aws cloudformation describe-stacks --stack-name DevOpsCodingChallenge --query "Stacks[*].StackStatus" --output text
+CREATE_COMPLETE
+```
+
+Only then get the URL of the loadbalancer:
+
+```bash
+$ aws cloudformation describe-stacks --stack-name DevOpsCodingChallenge --query "Stacks[*].Outputs[3].OutputValue" --output text
+http://DevOp-Appli-19K2DJZCEDV6D-157884943.eu-west-1.elb.amazonaws.com
+```
+
+Check you can access the loadbalancer and request the version.txt file:
+
+```bash
+$ curl http://DevOp-Appli-19K2DJZCEDV6D-157884943.eu-west-1.elb.amazonaws.com
+$ curl http://DevOp-Appli-19K2DJZCEDV6D-157884943.eu-west-1.elb.amazonaws.com/version.txt
+1.0.6
+```
+
+#### How to run the checker script
+
+The checker script is written in bash (KISS principle). The script runs in a SSH connection and by default checks if the nginx container is running every 10 seconds. 
+If is not running, it executes the same ansible playbook that was used to boostrap the server. 
+
+* An optional interval time can be set as argument.
+* Make sure you use the same SSH key defined by the time you create the cloudformation stack
+
+```bash
+$ ssh -i ~/.ssh/devops-key.pem ubuntu@54.229.177.233 '/bin/bash -s' < check-nginx.sh 10
+Nginx container is running with ID 42aced6bfa38
+Nginx container is running with ID 42aced6bfa38
+
+
+docker: "inspect" requires a minimum of 1 argument.
+See 'docker inspect --help'.
+
+Usage:	docker inspect [OPTIONS] CONTAINER|IMAGE|TASK [CONTAINER|IMAGE|TASK...]
+
+Return low-level information on a container, image or task
+ [WARNING]: provided hosts list is empty, only localhost is available
+
+PLAY ***************************************************************************
+
+TASK [install docker] **********************************************************
+ok: [localhost]
+
+TASK [install docker-py] *******************************************************
+ok: [localhost]
+
+TASK [nginx container] *********************************************************
+changed: [localhost]
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=3    changed=1    unreachable=0    failed=0
+
+Nginx container is running with ID 2c66b8f30afc
+Nginx container is running with ID 2c66b8f30afc
+```
+
+You can test how this script works, by estableshing a SSH connection in another session and stop the docker container:
+
+```bash
+$ ssh -i ~/.ssh/devops-key.pem ubuntu@54.229.177.233
+$ sudo docker stop $(sudo docker ps -q)
+```
