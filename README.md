@@ -79,7 +79,7 @@ $ export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 $ export AWS_DEFAULT_REGION=eu-west-1
 ```
 
-Then using AWS cli create a stack using the CloudFormation template available in this repo:
+Then using AWS cli create a stack with the CloudFormation template available in this repo:
 
 ```bash
 $ aws cloudformation create-stack \
