@@ -90,9 +90,6 @@ ParameterKey=KeyName,ParameterValue=devops-key \
 ParameterKey=SSHLocation,ParameterValue="0.0.0.0/0" \
 ParameterKey=Subnets,ParameterValue=subnet-47a8391e\\,subnet-861046e3\\,subnet-d1c2bda6 \
 ParameterKey=VpcId,ParameterValue=vpc-3ce38759 
-{
-    "StackId": "arn:aws:cloudformation:eu-west-1:xxxxxxxxxxxx:stack/DevOpsCodingChallenge/bc0a5070-536e-11e7-9393-500c4266c6d2"
-}
 ```
 
 Check stack status by running the following command:
